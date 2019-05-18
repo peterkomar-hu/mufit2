@@ -26,8 +26,8 @@ This produces the cleaned time series $(t, x)$ of $N$ data points:
 	t &=& (t_1, t_2, \ldots t_N), \quad \text{where}\; t_n \in \mathds{R},\quad \text{and}\; t_n < t_{n+1}, \\
 	x &=& (x_1, x_2, \ldots x_N), \quad \text{where}\; x_n = \log(\text{od}) \in \mathds{R},
 \ea
-and a list of $R$ regions, i.e. non-overlapping sets,
+and a list of $R$ regions, i.e. non-overlapping sets $\mathcal{R}_r$,
 \be
-	r \in \{r_1, r_2, \ldots r_R\},\qquad \text{where each }r = \{s(r), s(r) + 1, \ldots e(r) - 1, e(r)\} \subset \{1, 2,\ldots N\}
+	r \in \{1, 2, \ldots R\},\qquad \text{where each }\mathcal{R}_r = \{s(r), s(r) + 1, \ldots e(r) - 1, e(r)\} \subset \{1, 2,\ldots N\}
 \ee
 is a list of consecutive indexes, where $s(r)$ is the first and $e(r)$ is the last.

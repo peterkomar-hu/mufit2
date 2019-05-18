@@ -1,0 +1,53 @@
+\section{Model}
+
+We model all $R$ regions of the cleaned time series $(t, x)$ with a single model that captures the gradual growth within each region as well as two features of between-region change of the growth rate ($\mu$), sudden changes and long-term drifts.
+
+\subsection{Parameters}
+We use the following unknown variables to describe the time series. The role of each value will become more clear in the next subsection.
+\begin{itemize}
+	\item $x_0 = \{x_{r,0}\;:\;r=1,2,\ldots R\} \in \mathds{R}^R$ represents the starting log-OD value at the beginning of each region.
+	\item $\mu_1 = \{\mu_{r,1}\;:\;r=1,2,\ldots R\} \in \mathds{R}^R$  represents the growth rate at the beginning of each region.
+	\item $\mu_2 = \{\mu_{r,2}\;:\;r=1,2,\ldots R\} \in \mathds{R}^R$  represents the growth rate at the end of each region.
+	\item $\sigma_x \in \mathds{R}$ is the strength of measurement noise of log-OD.
+	\item $\mu_0$ is $\mu$ at the beginning of the experiment.
+	\item $\nu_0$ is the \emph{rate of change} of $\mu$ at the beginning of the experiment
+	\item $D$ is the diffusion coefficient of the velocity of the long term drift of $\mu$.
+	\item $\tau$ is the time scale of the short-term fluctuations of $\mu$.
+	\item $\sigma_y$ is the magnitude of the short-term fluctuations of $\mu$.
+\end{itemize}
+
+
+\subsection{Individual regions}
+We assume that for given $x_0, \mu_1, \mu_2$ values, the log-OD values in different regions become independent. This allows us to write the generating distribution of log-OD as 
+\be
+	P(x\;|\;t, x_0, \mu_1, \mu_2) = \prod_{r=1}^R P(x^{(r)}\;|\;t^{(r)}, x_{r,0}, \mu_{r,1}, \mu_{r,2})\quad ,
+\ee
+where $x^{(r)}$ and $t^{(r)}$ are the set of log-OD and time points belonging to region $r$.
+
+Furthermore, within each region $r$, we assume that $\mu$ changes deterministically and linearly between $\mu_{r,1}$ (at $t_{s(r)}$) and $\mu_{r,2}$ (at $t_{e(r)}$), i.e.
+\be
+	\mu(t) = 
+	\mu_{r,1} \frac{t_{e(r)} - t}{t_{e(r)} - t_{s(r)}} + 
+	\mu_{r,2} \frac{t - t_{s(r)}}{t_{e(r)} - t_{s(r)}}\quad,\quad\text{if}\quad t_{s(r)} \leq t \leq t_{e(r)}\quad.
+\ee
+This leads to a quadratic time dependence for the ``noiseless'' log-OD,
+\ba
+	x_r^\text{noiseless}(t) 
+	&=& 
+	x_{r,0} + \intop_{t_{s(r)}}^{t} \d{t'} \mu(t') = 
+	x_{r,0} + f_r(t)\,\mu_{r,1} + g_r(t)\,\mu_{r,2}\quad ,\text{ where }
+	\\
+	f_r(t) &=& \frac{t_{e(r)}(t - t_{s(r)}) - \frac{1}{2} (t^2 - t_{s(r)}^2)}{t_{e(r)} - t_{s(r)}}
+	\\
+	g_r(t) &=& \frac{\frac{1}{2}(t^2 - t_{s(r)}^2) - t_{s(r)}(t - t_{s(r)})}{t_{e(r)} - t_{s(r)}}
+\ea
+The noiseless log-OD deterministic (given $x_0, \mu_1, \mu_2$). If  we further assume that the measurement noise is uncorrelated between different time points, then each $x_n$ becomes independent from every other $x_{n'}$. Assuming Gaussian noise with strength $\sigma_x$, we can write their generating distribution as
+\be
+	P(x^{(r)}\;|\;t^{(r)}, x_{r,0}, \mu_{r,1}, \mu_{r,2}) = \prod_{n=s(r)}^{e(r)} \text{Normal}\Big(x_n\;\Big|\;\text{mean}=x_r^\text{noiseless}(t_n), \;\text{variance}=\sigma_x^2\Big)
+\ee
+
+
+
+
+
+
