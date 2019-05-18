@@ -1,0 +1,33 @@
+\section{Data}
+
+\subsection{Raw optical density data}
+We start with the time series of the raw optical density (OD) measurements recorded during a single experimental run of a turbidostat. At consecutive (but not necessarily equidistant) time points, OD is recorded. This produces two vectors of real numbers:
+\begin{itemize}
+	\item the time points, $\{\text{tp}_n\;:\; n = 1,2, \ldots N_\text{total}\}$, and
+	\item the OD values, $\{\text{od}_n\;:\; n = 1,2, \ldots N_\text{total}\}$.
+\end{itemize}
+Under normal operating conditions, the time series (tp, od) has the following features:
+\begin{itemize}
+	\item a long initial growth from a low OD value to the operating OD regime,
+	\item sharp drops of OD, when it reaches a predefined threshold value,
+	\item gradual growth of OD between sharps drops, and
+	\item intermittent spikes of OD.
+\end{itemize}
+
+\subsection{Preprocessing}
+Out of the four features of the raw (tp, od) time series, we wish to model only the gradual growth (and maybe the initial growth) phases. For this we filter the time series and partition it into non-overlapping regions by 
+\begin{enumerate}
+	\item Using heuristic filters to identify sudden changes of od, and remove the associated data points.
+	\item Group uninterrupted series of data points into non-overlapping regions.
+	\item Take the logarithm of OD.
+\end{enumerate}
+This produces the cleaned time series $(t, x)$ of $N$ data points:
+\ba
+	t &=& (t_1, t_2, \ldots t_N), \quad \text{where}\; t_n \in \mathds{R},\quad \text{and}\; t_n < t_{n+1}, \\
+	x &=& (x_1, x_2, \ldots x_N), \quad \text{where}\; x_n = \log(\text{od}) \in \mathds{R},
+\ea
+and a list of $R$ regions, i.e. non-overlapping sets,
+\be
+	r \in \{r_1, r_2, \ldots r_R\},\qquad \text{where each }r = \{s(r), s(r) + 1, \ldots e(r) - 1, e(r)\} \subset \{1, 2,\ldots N\}
+\ee
+is a list of consecutive indexes, where $s(r)$ is the first and $e(r)$ is the last.
