@@ -69,7 +69,7 @@ We model the expected long-term and short-term behaviors of $\mu$ with the sum o
 		(m^\text{int.BM})_i &=& \mu_0 + \nu_0 T_i \\
 		(\Sigma^\text{int.BM})_{i,j} &=& D \;\frac{\text{min}(T_i, T_j)}{2} \left(\text{max}(T_i, T_j) - \frac{\text{min}(T_i, T_j)}{3}\right)
 	\ea
-	where $\mu_0, \nu_0$ are the value and rate of change of $\mu$ at $T_1$, and $D$ is the diffusion coefficient of the rate of change.
+	where $\mu_0, \nu_0$ are the value and rate of change of $\mu$ at $T_1$, and $D$ is the diffusion coefficient of the rate of change. (See appendix \ref{app:intBM} for derivation.)
 
 	\item The short-term changes are modeled by a Gaussian process with squared exponential covariance:
 	\ba
@@ -91,9 +91,9 @@ We assuming independence between the two processes (given their parameter values
 \subsection{Prior of $x_0$}
 We introduce a Gaussian prior for $x_0$,
 \be
-	P(x_0) = \prod_{r=1}^R \text{Normal}\Big(x_{r,0}\;\Big|\;\text{mean} = \bar x, \; \text{variance} = (\Delta x)^2\Big),
+	P(x_0) = \prod_{r=1}^R \text{Normal}\Big(x_{r,0}\;\Big|\;\text{mean} = \bar x, \; \text{variance} = \lambda^2(\Delta x)^2\Big),
 \ee
-where $\bar x = \frac{1}{N}\sum_{i=1}^N x_i$ is the mean and $(\Delta x)^2 = \frac{1}{N}\sum_{i=1}^N (x_i - \bar x)^2$ is the empirical standard deviation of all log-OD values. This choice does not introduce additional parameters, but makes both algebraic and numerical operations easier.
+where $\bar x = \frac{1}{N}\sum_{i=1}^N x_i$ is the mean and $(\Delta x)^2 = \frac{1}{N}\sum_{i=1}^N (x_i - \bar x)^2$ is the empirical standard deviation of all log-OD values. Constant $\lambda$ is a large enough spread factor, whose exact value is unimportant as long as $\lambda > 3$. This prior choice does not introduce additional restrictions, but makes the following algebraic and numerical manipulations well-behaving.
 
 \subsection{Complete model}
 Putting the two components of the model (described by \refeq{eq:P_region} and \refeq{eq:P_mu}) together yields the joint generating distribution
@@ -115,10 +115,12 @@ With this notation, we can eliminate $x_r^\text{noiseless}$ from the graphical r
 	P(x, \tilde z\;|\;\mu_0, \nu_0, D, \sigma_\mu, \tau) = P\Big(\tilde z\;\Big|\; \mu_0, \nu_0, D, \sigma_\mu, \tau\Big) \prod_{r=1}^R P\Big(x^{(r)} \;\Big|\; z_r, \sigma_x\Big)\quad .
 \ee
 
+\subsection{Re-ordering $\tilde z$}
 To make calculations in the next section easier, we define a re-ordered version of $\tilde z$:
-\be
+\bel
+\label{eq:def_S}
 	z =  \left[\bigoplus_{r=1}^R x_{r,0}\right]\oplus \left[\bigoplus_{r=1}^R (\mu_{r,1}, \mu_{r,2})\right] = S \tilde z\quad ,
-\ee
+\eel
 where $S = (S_{i,j}\;:\; i,j\in\{0,1,2\ldots R-1\})$ is the permutation matrix expressed with zero-based indexes
 \ba
 	S_{i,j} = \left\{
@@ -129,6 +131,69 @@ where $S = (S_{i,j}\;:\; i,j\in\{0,1,2\ldots R-1\})$ is the permutation matrix e
 	\right.
 \ea
 where $[\ldots]$ is one if the statement inside if true and false otherwise, and $\lfloor \ldots \rfloor$ indicates the floor function.
-We will use $S$ to convert between the ordering of $\tilde z$ and $z$.
+
+We will use the $S$ matrix to convert between the ordering of $\tilde z$ and $z$. As an example, we expand $S\tilde z = z$ for $R=4$  explicitly:
+\be
+	S\tilde z
+	\qquad = \qquad
+	\left[
+	\begin{array}{ccc|ccc|ccc|ccc}
+		1 &   &   &   &   &   &   &   &   &   &   &   \\
+		  &   &   & 1 &   &   &   &   &   &   &   &   \\
+		  &   &   &   &   &   & 1 &   &   &   &   &   \\
+		  &   &   &   &   &   &   &   &   & 1 &   &   \\
+		  \hline
+		  & 1 &   &   &   &   &   &   &   &   &   &   \\
+		  &   & 1 &   &   &   &   &   &   &   &   &   \\
+		  &   &   &   & 1 &   &   &   &   &   &   &   \\
+		  &   &   &   &   & 1 &   &   &   &   &   &   \\
+		  &   &   &   &   &   &   & 1 &   &   &   &   \\
+		  &   &   &   &   &   &   &   & 1 &   &   &   \\
+		  &   &   &   &   &   &   &   &   &   & 1 &   \\
+		  &   &   &   &   &   &   &   &   &   &   & 1
+	\end{array}
+	\right]
+	\quad
+	\left[
+	\begin{array}{c}
+		x_{1,0}   \\
+		\mu_{1,1} \\ 
+		\mu_{1,2} \\
+		\hline
+		x_{2,0}   \\
+		\mu_{2,1} \\
+		\mu_{2,2} \\
+		\hline
+		x_{3,0}   \\
+		\mu_{3,1} \\
+		\mu_{3,2} \\
+		\hline
+		x_{4,0}   \\
+		\mu_{4,1} \\
+		\mu_{4,2} 
+	\end{array}
+	\right]
+	\quad = \quad
+	\left[
+	\begin{array}{c}
+		x_{1,0}   \\
+		x_{2,0}   \\
+		x_{3,0}   \\
+		x_{4,0}   \\
+		\hline
+		\mu_{1,1} \\ 
+		\mu_{1,2} \\
+		\mu_{2,1} \\
+		\mu_{2,2} \\
+		\mu_{3,1} \\
+		\mu_{3,2} \\
+		\mu_{4,1} \\
+		\mu_{4,2} 
+	\end{array}
+	\right]
+	\qquad = \qquad
+	z
+\ee
+
 
 

@@ -1,0 +1,148 @@
+\section{Type II maximum likelihood solution}
+
+We wish to obtain robust estimates of $\mu$, and its statistical uncertainty. To do this, we follow the ``type II'' maximum likelihood procedure:
+\begin{enumerate}
+	\item We determine the maximum likelihood estimates of the parameters $\mu_0, \nu_0, D, \sigma_\mu, \tau$ and $\sigma_x$. (For this, we need a computationally efficient access to the marginal likelihood $P(x\;|\; \mu_0, \nu_0, D, \sigma_\mu, \tau, \sigma_x)$.)
+
+	\item Using the MLE parameter values, we calculate the mean and standard deviation of each element of $\mu$.
+\end{enumerate}
+
+In this section, we derive a formula for the logarithm of the marginal likelihood, which can directly implemented using matlab or python's numpy.
+
+\subsection{Expanding \refeq{eq:P_region}}
+To better understand how data from each region $x^{(r)}$ determines the region-specific parameters $z_r = (x_{r,0}, \mu_{r,1}, \mu_{r,2})$, we expand \refeq{eq:P_region}.
+\be
+	P(x^{(r)}\;|\;z_r, \sigma_x) = \prod_{n=s(r)}^{e(r)} \text{Normal}\Big(x_n\;\Big|\; x_{r,0} + f_r(t_n) \mu_{r,1} + g_r(t_n)\mu_{r,2}\Big)
+\ee
+Now, we can expand pdf of the normal distribution and write
+\be
+	P(x^{(r)}\;|\;z_r, \sigma_x) = \exp\left(-\frac{N_r}{2}\log(2\pi \sigma_x^2)\right) \;\exp\left(-\frac{1}{2\sigma_x^2} \sum_{n=s(r)}^{e(r)} \Big[x_{r,0} + f_r(t_n)\mu_{r,1} + g_r(t_n)\mu_{r,2} - x_n \Big]^2\right)
+\ee
+where $N_r = e(r) - s(r) + 1$. We expand square bracket and distribute the summation on the terms. The result is a quadratic form of the vector $z_r$,
+\ba
+	-\frac{1}{2}\sum_{n=s(r)}^{e(r)}\Big[\ldots\Big]^2 &=& \gamma_r + b_r\T z_r - \frac{1}{2}z_r\T A_r z_r,\qquad \text{where}
+	\\
+	\gamma_r &=& -\frac{1}{2} \sum_{n=s(r)}^{e(r)} (x_n)^2
+	\\
+	b_r &=& \sum_{n=s(r)}^{e(r)}\threevector{x_n}{ x_nf_r(t_n) }{x_ng_r(t_n)}
+	\\
+	A_r &=& \sum_{n=s(r)}^{e(r)} \threebythreematrix
+	{1}{ f_r(t_n)}{ g_r(t_n)}
+	{ f_r(t_n)}{(f_r(t_n))^2}{f_r(t_n)g_r(t_n)}
+	{ g_r(t_n)}{f_r(t_n)g_r(t_n)}{(g_r(t_n))^2}
+\ea
+
+When we consider all regions, their generating distribution can be written as 
+\bal
+	P(x\;|\;z,\sigma_x) &=& \prod_{r=1}^R P(x^{(r)}\;|\;z_r, \sigma_x)
+	\nonumber\\
+	&=& \exp\left(-\frac{N}{2}\log(2\pi \sigma_x^2)\right) \exp\left(\frac{1}{\sigma_x^2} \sum_{r=1}^R \Big[\gamma_r + b_r\T z_r - \frac{1}{2} z_r\T A_r z_r\Big]\right) \nonumber\\
+\label{eq:Px|z}
+	&=& \exp\left(-\frac{N}{2}\log(2\pi \sigma_x^2)\right) \exp\left(\frac{1}{\sigma_x^2} \Big[\gamma + b\T \tilde z - \frac{1}{2} \tilde z\T A \tilde z\Big]\right)
+\eal
+where the new variables $\gamma, b, A$ are (direct) sums of the individual $\gamma_r, b_r, A_r$ variables:
+\be
+	\gamma = \sum_{r=1}^R \gamma_r,\qquad b = \bigoplus_{r=1}^R b_r,\qquad A = \bigoplus_{r=1}^R A_r,
+\ee 
+where we define the direct sum of the matrices as the operation of concatenating them in a block-diagonal fashion. (Note: Since $\gamma, b, A$ do not depend on model parameters, we can compute them once and store their values to improve efficiency.)
+
+\subsection{Expanding \refeq{eq:P_mu}}
+Now, we expand the formula describing how the hyperparameters $\mu_0, \nu_0, D, \sigma_\mu, \tau$ affect the region-specific parameters $z_r = (x_{r,0}, \mu_{r,1}, \mu_{r,2})$. While \refeq{eq:P_mu} describes the joint distribution of all elements of $\mu_1$ and $\mu_2$, here we incorporate $x_0$ into the formula, and express the joint distribution of all elements of $z$ ($=S\tilde z$).
+\bal
+	\mu = \bigoplus_{r=1}^R (\mu_{r,1}, \mu_{r,2}) 
+	&\sim& 
+	\text{Multi-Normal}
+	\Big(\mu\;\Big|\;
+	\text{mean} = 
+		\underbrace{
+			m^\text{int.BM} + m^\text{sq.exp}
+		}_{m^{(\mu)}},\,
+	\text{cov} = 
+		\underbrace{
+			\Sigma^\text{int.BM} + \Sigma^\text{sq.exp}
+		}_{\Sigma^{(\mu)}}
+	\Big)
+	\nonumber\\
+	x_0 = \bigoplus_{r=1}^R x_{r,0} 
+	& \sim &
+	\text{Multi-Normal}
+	\Big( x_0 \;\Big| \;
+	\text{mean} = 
+		\underbrace{
+			\mathbf{1}_R \tilde x
+		}_{m^{(x_0)}},\,
+	\text{cov} = 
+		\underbrace{
+			\mathbb{I}_{R\times R} (\Delta x)^2
+		}_{\Sigma^{(x_0)}}
+	\Big)
+	\nonumber\\
+	z = x_0\oplus \mu 
+	&\sim &
+	\text{Multi-Normal}\Big(z\;\Big|\;\text{mean} = m,\,\text{cov}=\Sigma\Big)\nonumber\\
+\label{eq:Pz}
+	&& 
+	= 
+	\exp\left(-\frac{1}{2}\log\Big(\det (2\pi \Sigma)\Big)\right)\,
+	\exp\left(-\frac{1}{2}(z - m)\T \Sigma^{-1} (z-m)\right)
+\eal
+where $\mathbf{1}_R$ is the all-1 vector, and $\mathbb{I}_{R\times R}$ is the identity matrix, and the mean and covariance of $z$ can be written as 
+\be
+	m = m^{(x_0)} \oplus m^{(\mu)},\qquad
+	\Sigma = \Sigma^{(x_0)} \oplus \Sigma^{(\mu)}
+\ee
+where the direct sum ($\oplus$) is defined as concatenation between vectors and block-diagonal composition between matrices. Separating the determinant and the inverse operations on the $x_0$ and the $\mu$ spaces,
+\ba
+	\Sigma^{-1} &=& \Big(\Sigma^{(x_0)}\Big)^{-1} \oplus \Big(\Sigma^{(\mu)}\Big)^{-1}\quad,\\
+	\log\Big(\det(2\pi \Sigma)\Big) &=& 3R \log(2\pi) + \log\Big(\det(\Sigma^{(x_0)})\Big) + \log\Big(\det(\Sigma^{(\mu)})\Big)\quad,
+\ea
+will lead more efficient calculations because $m^{(x_0)}$ and $\Sigma^{(x_0)}$ are known but $m^{(\mu)}$ and $\Sigma^{(\mu)}$ are unknown, and need to be evaluated at every iteration step during fitting.
+
+\subsection{Eliminating $z$}
+Multiplying \refeq{eq:Pz} and \refeq{eq:Px|z}, and converting $\tilde z$ to $z$ using the definition of the permutation matrix $S$ from \refeq{eq:def_S} ($\tilde z = S\T z$) yields the likelihood in the following quadratic exponential form
+\ba
+	P(x\;|\;z) \,P(z) &=& 
+	\exp\left(-\frac{N}{2}\log(2\pi \sigma_x^2)\right) 
+	\exp\left(\frac{1}{\sigma_x^2} \Big[\gamma + (Sb)\T z - \frac{1}{2} z\T (S A S\T) z\Big]\right) \times \\
+	&& 
+	\exp\left(-\frac{1}{2}\log\Big(\det (2\pi \Sigma)\Big)\right)\,
+	\exp\left(-\frac{1}{2}(z - m)\T \Sigma^{-1} (z-m)\right)
+	\\
+	&=& \exp\left(-\frac{1}{2}z\T\mathcal{A} z + \mathcal{B}\T z + \mathcal{C}\right)
+\ea
+where
+\ba
+	\mathcal{A} &=& \frac{1}{\sigma_x^2}SAS\T + \Sigma^{-1} \\
+	\mathcal{B} &=& \frac{1}{\sigma_x^2} Sb + m \\
+	\mathcal{C} &=& -\frac{N}{2}\log(2\pi \sigma_x^2) -\frac{1}{2}\log\Big(\det (2\pi \Sigma)\Big) + \frac{\gamma}{\sigma_x^2} - \frac{1}{2}m\T \Sigma^{-1}m\quad.
+\ea
+
+To eliminate $z$ from the likelihood, we integrate with respect to $z$. Using the result for such a Gaussian integral (see Appendix \ref{app:gaussian_integral}), we obtain
+\be
+	P(x) = \int\d{z} P(x\;|\;z)P(z) = \int\d{z} \exp\left(-\frac{1}{2}z\T\mathcal{A} z + \mathcal{B}\T z  + \mathcal{C}\right) = \sqrt{\frac{(2\pi)^{3R}}{\det(\mathcal{A})}} \exp\left(\frac{1}{2}\mathcal{B}\T\mathcal{A}^{-1}\mathcal{B} + \mathcal{C}\right)\quad.
+\ee
+Taking the logarithm yields the log likelihood as a function of the data $x$ and the hyperparameters $\mu_0$, $\nu_0$, $D$, $\sigma_\mu$, $\tau$, $\sigma_x$,
+\bel
+\label{eq:L}
+	L\big(\mu_0, \nu_0, D, \sigma_\mu, \tau, \sigma_x\big) = \log P(x) = \frac{3R}{2}\log(2\pi) - \frac{1}{2}\log\Big(\det(\mathcal{A})\Big) + \frac{1}{2}\mathcal{B}\T\mathcal{A}^{-1}\mathcal{B} + \mathcal{C}\quad.
+\eel
+
+We can start from realistic values for the hyperparameters, use gradient-based optimization methods to find maximum of $L$. This yields the maximum likelihood estimates $\mu_0\s$, $\nu_0\s$, $D\s$, $\sigma_\mu\s$, $\tau\s$, $\sigma_x\s$.
+
+\subsection{Posterior mean and variance of $\mu$}
+We can use the maximum likelihood estimates of $\mu_0\s$, $\nu_0\s$, $D\s$, $\sigma_\mu\s$, $\tau\s$, $\sigma_x\s$ to calculate the mean and variance of the growth rate from the joint distribution
+\be
+	P(x, z) = P(x\;|\;z) P(z) = \exp\left(-\frac{1}{2}z\T \mathcal{A} z + \mathcal{B}\T z + \mathcal{C}\right)\quad,
+\ee
+which, after dividing it with $P(x)$ (which is just a normalization constant from the point of view of $z$) yields the conditional probability
+\ba
+	P(z\;|\;x) &=& \frac{P(x,z)}{P(x)} \propto \exp\left(-\frac{1}{2}z\T \mathcal{A} z + \mathcal{B}\T z \right) \propto \exp\left(-\frac{1}{2}\Big(z - \mathcal{A}^{-1}\mathcal{B}\Big)\T\mathcal{A}\Big(z - \mathcal{A}^{-1}\mathcal{B}\Big)\right)
+	\\
+	&=&
+	\text{Multi-Normal}\Big(z\;\Big|\;\text{mean} = \mathcal{A}^{-1}\mathcal{B},\;\text{cov}=\mathcal{A}^{-1}\Big)\quad,
+\ea
+which means that each component of $z$ ($x_{r,0}$ and $\mu_{r,1}, \mu_{r,2}$) is distributed as a normal distribution. Remembering that $z = x_0 \oplus \mu$, we can express the mean and variance of each element of $\mu \in \mathds{R}^{2R}$ as
+\bel
+	\mathbb{E}(\mu_i\;|\;x, \mu_0\s, \nu_0\s, D\s, \sigma_\mu\s, \tau\s, \sigma_x\s) = \Big[\mathcal{A}^{-1}\mathcal{B}\Big]_{R+i}\quad,\qquad
+	\text{var}(\mu_i\;|\;x, \mu_0\s, \nu_0\s, D\s, \sigma_\mu\s, \tau\s, \sigma_x\s) = \Big[\mathcal{A}^{-1}\Big]_{R+i,\,R+i}\quad.
+\eel
