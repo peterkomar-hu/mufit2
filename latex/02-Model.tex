@@ -67,7 +67,7 @@ We model the expected long-term and short-term behaviors of $\mu$ with the sum o
 	\item The long-term drift with gradually changing slope is modeled by the integral of a Brownian motion. In other words we expect the \emph{rate of change} of $\mu$ to walk randomly with a fixed diffusion rate. This process has the following mean and covariance
 	\ba
 		(m^\text{int.BM})_i &=& \mu_0 + \nu_0 T_i \\
-		(\Sigma^\text{int.BM})_{i,j} &=& D \;\frac{\text{min}(T_i, T_j)}{2} \left(\text{max}(T_i, T_j) - \frac{\text{min}(T_i, T_j)}{3}\right)
+		(\Sigma^\text{int.BM})_{i,j} &=& D \;\frac{\Big(\text{min}(T_i, T_j)\Big)^2}{2} \left(\text{max}(T_i, T_j) - \frac{\text{min}(T_i, T_j)}{3}\right)
 	\ea
 	where $\mu_0, \nu_0$ are the value and rate of change of $\mu$ at $T_1$, and $D$ is the diffusion coefficient of the rate of change. (See appendix \ref{app:intBM} for derivation.)
 
