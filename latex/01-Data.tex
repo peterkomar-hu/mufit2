@@ -30,4 +30,15 @@ and a list of $R$ regions, i.e. non-overlapping sets $\mathcal{R}_r$,
 \be
 	r \in \{1, 2, \ldots R\},\qquad \text{where each }\mathcal{R}_r = \{s(r), s(r) + 1, \ldots e(r) - 1, e(r)\} \subset \{1, 2,\ldots N\}
 \ee
-is a list of consecutive indexes, where $s(r)$ is the first and $e(r)$ is the last.
+is a list of consecutive indexes, where $s(r)$ is the first and $e(r)$ is the last. The bottom panel of \reffig{fig:data} illustrates how a typical $(x,t)$ time series look like.
+
+\newpage
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{figs/data.pdf}
+\caption{
+	\label{fig:data}
+	Illustration of the data expected by the model, which is described in the next section. {\bf (Top panel)} The growth rate $\mu$ changes gradually with time. {\bf (Middle panel)} The hidden $x^\text{noiseless}$ log-OD follows a saw-tooth-like behavior, where regions of gradual growth (between times $t_{s(r)}$ and $t_{e(r)}$ for each region $r$) are interrupted by sudden drops. {\bf (Bottom panel)}Due to measurement noise, the recorded $x$ log-OD values are distributed around the noiseless log-OD curve, where deviations are uncorrelated.
+}
+\end{figure}
+\newpage

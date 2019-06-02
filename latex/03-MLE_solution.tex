@@ -12,13 +12,13 @@ In this section, we derive a formula for the logarithm of the marginal likelihoo
 \subsection{Expanding \refeq{eq:P_region}}
 To better understand how data from each region $x^{(r)}$ determines the region-specific parameters $z_r = (x_{r,0}, \mu_{r,1}, \mu_{r,2})$, we expand \refeq{eq:P_region}.
 \be
-	P(x^{(r)}\;|\;z_r, \sigma_x) = \prod_{n=s(r)}^{e(r)} \text{Normal}\Big(x_n\;\Big|\; x_{r,0} + f_r(t_n) \mu_{r,1} + g_r(t_n)\mu_{r,2}\Big)
+	P(x^{(r)}\;|\;z_r, \sigma_x) = \prod_{n=s(r)}^{e(r)} \text{Normal}\Big(x_n\;\Big|\; \text{mean} = x_{r,0} + f_r(t_n) \mu_{r,1} + g_r(t_n)\mu_{r,2},\; \text{variance} = \sigma_x^2\Big)
 \ee
 Now, we can expand pdf of the normal distribution and write
 \be
 	P(x^{(r)}\;|\;z_r, \sigma_x) = \exp\left(-\frac{N_r}{2}\log(2\pi \sigma_x^2)\right) \;\exp\left(-\frac{1}{2\sigma_x^2} \sum_{n=s(r)}^{e(r)} \Big[x_{r,0} + f_r(t_n)\mu_{r,1} + g_r(t_n)\mu_{r,2} - x_n \Big]^2\right)
 \ee
-where $N_r = e(r) - s(r) + 1$. We expand square bracket and distribute the summation on the terms. The result is a quadratic form of the vector $z_r$,
+where $N_r = e(r) - s(r) + 1$. We expand the square bracket and distribute the summation on the terms. The result is a quadratic form of the vector $z_r$,
 \ba
 	-\frac{1}{2}\sum_{n=s(r)}^{e(r)}\Big[\ldots\Big]^2 &=& \gamma_r + b_r\T z_r - \frac{1}{2}z_r\T A_r z_r,\qquad \text{where}
 	\\
@@ -73,7 +73,7 @@ Now, we expand the formula describing how the hyperparameters $\mu_0, \nu_0, D, 
 		}_{m^{(x_0)}},\,
 	\text{cov} = 
 		\underbrace{
-			\mathbb{I}_{R\times R} (\Delta x)^2
+			\mathbb{I}_{R\times R} \lambda^2(\Delta x)^2
 		}_{\Sigma^{(x_0)}}
 	\Big)
 	\nonumber\\
@@ -113,7 +113,7 @@ Multiplying \refeq{eq:Pz} and \refeq{eq:Px|z}, and converting $\tilde z$ to $z$ 
 where
 \ba
 	\mathcal{A} &=& \frac{1}{\sigma_x^2}SAS\T + \Sigma^{-1} \\
-	\mathcal{B} &=& \frac{1}{\sigma_x^2} Sb + m \\
+	\mathcal{B} &=& \frac{1}{\sigma_x^2} Sb + \Sigma^{-1}m \\
 	\mathcal{C} &=& -\frac{N}{2}\log(2\pi \sigma_x^2) -\frac{1}{2}\log\Big(\det (2\pi \Sigma)\Big) + \frac{\gamma}{\sigma_x^2} - \frac{1}{2}m\T \Sigma^{-1}m\quad.
 \ea
 
