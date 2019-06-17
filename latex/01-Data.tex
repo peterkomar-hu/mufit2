@@ -15,22 +15,23 @@ Under normal operating conditions, the time series (tp, od) has the following fe
 \end{itemize}
 
 \subsection{Preprocessing}
-Out of the four features of the raw (tp, od) time series, we wish to model only the gradual growth (and maybe the initial growth) phases. For this we filter the time series and partition it into non-overlapping regions by 
-\begin{enumerate}
-	\item Using heuristic filters to identify sudden changes of od, and remove the associated data points.
-	\item Group uninterrupted series of data points into non-overlapping regions.
-	\item Take the logarithm of OD.
-\end{enumerate}
-This produces the cleaned time series $(t, x)$ of $N$ data points:
+Out of the four features of the raw (tp, od) time series, we wish to model only the gradual growth phases. For this, we filter the time series and partition it into non-overlapping regions by the heuristic jump event detection method described in Appendix \ref{app:heuristic_method}, and take the logarithm of OD.
+
+This produces the cleaned time series $(t, x)$:
 \ba
-	t &=& (t_1, t_2, \ldots t_N), \quad \text{where}\; t_n \in \mathds{R},\quad \text{and}\; t_n < t_{n+1}, \\
-	x &=& (x_1, x_2, \ldots x_N), \quad \text{where}\; x_n = \log(\text{od}) \in \mathds{R},
+	t &=& (t_1, t_2, \ldots), \quad \text{where}\; t_n \in \mathds{R},\quad \text{and}\; t_n < t_{n+1}, \\
+	x &=& (x_1, x_2, \ldots), \quad \text{where}\; x_n = \log(\text{od}) \in \mathds{R},
 \ea
 and a list of $R$ regions, i.e. non-overlapping sets $\mathcal{R}_r$,
 \be
-	r \in \{1, 2, \ldots R\},\qquad \text{where each }\mathcal{R}_r = \{s(r), s(r) + 1, \ldots e(r) - 1, e(r)\} \subset \{1, 2,\ldots N\}
+	r \in \{1, 2, \ldots R\},\qquad \text{where each }\,\mathcal{R}_r = \{s(r), s(r) + 1, \ldots e(r) - 1, e(r)\} \subset \{1, 2,\ldots\}
 \ee
-is a list of consecutive indexes, where $s(r)$ is the first and $e(r)$ is the last. The bottom panel of \reffig{fig:data} illustrates how a typical $(x,t)$ time series look like.
+is a list of consecutive indexes, where $s(r)$ is the first and $e(r)$ is the last. The total number of data points in all $R$ regions is
+\be
+	N = \sum_{r=1}^R (e(r) - s(r) + 1),
+\ee
+which may be smaller than the total data points in $(t,x)$ if some of them are not considered part of any region. This can happen to measurements during a shard drops, or at times of unexpectedly high fluctuations.
+The bottom panel of \reffig{fig:data} illustrates how a typical $(x,t)$ time series look like.
 
 \newpage
 \begin{figure}[h]

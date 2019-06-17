@@ -7,14 +7,14 @@ We wish to obtain robust estimates of $\mu$, and its statistical uncertainty. To
 	\item Using the MLE parameter values, we calculate the mean and standard deviation of each element of $\mu$.
 \end{enumerate}
 
-In this section, we derive a formula for the logarithm of the marginal likelihood, which can directly implemented using matlab or python's numpy.
+In this section, we derive a formula for the logarithm of the marginal likelihood, which can directly be implemented using matlab, python's numpy or stan.
 
 \subsection{Expanding \refeq{eq:P_region}}
 To better understand how data from each region $x^{(r)}$ determines the region-specific parameters $z_r = (x_{r,0}, \mu_{r,1}, \mu_{r,2})$, we expand \refeq{eq:P_region}.
 \be
 	P(x^{(r)}\;|\;z_r, \sigma_x) = \prod_{n=s(r)}^{e(r)} \text{Normal}\Big(x_n\;\Big|\; \text{mean} = x_{r,0} + f_r(t_n) \mu_{r,1} + g_r(t_n)\mu_{r,2},\; \text{variance} = \sigma_x^2\Big)
 \ee
-Now, we can expand pdf of the normal distribution and write
+Now, we can expand the pdf of the normal distribution and write
 \be
 	P(x^{(r)}\;|\;z_r, \sigma_x) = \exp\left(-\frac{N_r}{2}\log(2\pi \sigma_x^2)\right) \;\exp\left(-\frac{1}{2\sigma_x^2} \sum_{n=s(r)}^{e(r)} \Big[x_{r,0} + f_r(t_n)\mu_{r,1} + g_r(t_n)\mu_{r,2} - x_n \Big]^2\right)
 \ee
@@ -69,7 +69,7 @@ Now, we expand the formula describing how the hyperparameters $\mu_0, \nu_0, D, 
 	\Big( x_0 \;\Big| \;
 	\text{mean} = 
 		\underbrace{
-			\mathbf{1}_R \tilde x
+			\mathbf{1}_R \bar x
 		}_{m^{(x_0)}},\,
 	\text{cov} = 
 		\underbrace{
